@@ -1,0 +1,82 @@
+class ErrorDisplay {
+	def __init__( text ) {
+		this.text = text;
+		this.reload = false;
+		this.reloadButton = null;
+		this.reloadAlpha = 1;
+		this.pos = Vec2( 0, 0 );
+	}
+
+	def update( state ) {
+		if ( this.reloadButton == null ) {
+			w = ( ( System.height * .1 ) * ( 250 / 64 ) ) / System.width;
+			this.reloadButton = PanelTask( blend="ADDITIVE",
+					source=Texture( file="../textures/reload.png" ),
+					shader=Shader( vp="shaders/colmap.vp", fp="shaders/colmap.fp" ),
+					dstRect=Rect( ( 1 - w ) / 2, ( 1 + w ) / 2, 0, .1 ) );
+			this.message = LabelTask( text=this.text );
+		} else {
+			state.addTask( this.reloadButton );
+			state.addTask( this.message );
+
+			for ( event : state.getEvents( 'mouse' ) ) {
+				action = event.getAction();
+				data = event.getData();
+
+				if ( action == 'position' ) {
+					/* highlight reload */
+					if ( this.reloadButton.getDstRect().contains( this.pos ) ) {
+						this.reloadAlpha = 1;
+					}
+					this.pos = data;
+				} elif ( action == 'up' ) {
+					if ( data == 'left' ) {
+						if ( this.reloadButton.getDstRect().contains( this.pos ) ) {
+							/* reload */
+							this.reload = true;
+						}
+					}
+				}
+			}
+
+			/* unhighlight reload */
+			this.reloadAlpha = Math.max( this.reloadAlpha - System.step, .3 );
+			this.reloadButton.setAlpha( this.reloadAlpha );
+		}
+	}
+}
+
+class ScriptHandler {
+	def __init__( file ) {
+		this.file = file;
+		this.error = null;
+		this.script = null;
+		loadScript( file, this.loadingCallback );
+	}
+
+	def loadingCallback( script ) {
+		this.script = script;
+	}
+
+	def isLoaded() {
+		return null != this.script;
+	}
+
+	def update( state ) {
+		if ( null != this.script ) {
+			if ( null != this.error ) {
+				this.error.update( state );
+				if ( this.error.reload ) {
+					this.script = null;
+					loadScript( this.file, this.loadingCallback );
+				}
+			} else {
+				try {
+					this.script.update( state );
+				} catch: e {
+					this.error = ErrorDisplay( e );
+				}
+			}
+		}
+	}
+}

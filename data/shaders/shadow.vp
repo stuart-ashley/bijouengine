@@ -1,0 +1,46 @@
+//----------------------------------------------------------------------------
+// attributes
+//----------------------------------------------------------------------------
+attribute vec3 a_position;
+attribute vec2 a_alphaUV;
+attribute vec4 a_boneIndices;
+attribute vec4 a_boneWeights;
+//----------------------------------------------------------------------------
+// uniforms
+//----------------------------------------------------------------------------
+uniform mat4 proj_matrix; // view to projection
+uniform mat4 modelView_matrices[ MAX_INSTANCES ]; // model to view
+uniform mat4 SkinningMatrices[ 32 ];
+uniform vec3 Scale;
+//----------------------------------------------------------------------------
+// varying
+//----------------------------------------------------------------------------
+varying vec2 v_alphaUV;
+varying vec4 v_viewPos;
+//----------------------------------------------------------------------------
+void main()
+{
+#ifdef SCALE
+	vec4 p = vec4( a_position * Scale, 1. );
+#else
+	vec4 p = vec4( a_position, 1. );
+#endif
+
+#ifdef SKINNING
+	vec4 weightedPos = vec4( 0., 0., 0., 0. );
+	for ( int i = 0; i < 4; ++i ) {
+		mat4 m = SkinningMatrices[ int( a_boneIndices[ i ] ) ];
+		weightedPos += m * p * a_boneWeights[ i ];
+	}
+	v_viewPos = modelView_matrices[ gl_InstanceID ] * weightedPos;
+#else
+	v_viewPos = modelView_matrices[ gl_InstanceID ] * p;
+#endif
+
+	gl_Position = proj_matrix * v_viewPos;
+
+#ifdef ALPHAMAP
+	v_alphaUV = a_alphaUV;
+#endif
+}
+//----------------------------------------------------------------------------

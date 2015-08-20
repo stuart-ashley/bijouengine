@@ -1,0 +1,159 @@
+static active = null;
+
+class Loader {
+	static {
+		loadScript( "widgets/scriptHandler.script", Loader.loadingCallback );
+	}
+	static scriptHandler = null;
+
+	static def loadingCallback( script ) {
+		Loader.scriptHandler = script;
+	}
+}
+
+class Layout {
+	static bg = PanelTask( dstRect=Rect( 0, 1, 0, 1 ), level=-1,
+			uniforms=List( Uniform( "Source", Texture( file="textures/brushed.png" ) ) ),
+			shader=Shader( vp='shaders/colmap.vp', fp='shaders/colmap.fp' ) );
+
+	def __init__( items ) {
+		this.items = items;
+
+		nItems = items.size();
+
+		nCols = Math.ceil( Math.sqrt( nItems ) );
+		nRows = Math.ceil( nItems / nCols );
+
+		/*  */
+		w = ( 1 - ( .02 * ( nCols + 1 ) ) ) / nCols;
+		h = ( 1 - ( .02 * ( nRows + 1 ) ) ) / nRows;
+		imgh = .85 * h;
+		aspect = 1.6 / ( System.width / System.height );
+
+		if ( ( w / imgh ) > aspect ) {
+			w = imgh * aspect;
+			xBorder = ( 1 - ( w * nCols ) ) / ( nCols + 1 );
+			yBorder = .02;
+		} else {
+			h = ( w / aspect ) / .85;
+			xBorder = .02;
+			yBorder = ( 1 - ( h * nRows ) ) / ( nRows + 1 );
+		}
+
+		sx = w;
+		sy = h;
+		i = 0;
+		top = 1 - yBorder;
+		bottom = top - sy;
+		for ( y : Math.range( nRows - 1 ) ) {
+			left = xBorder;
+			for ( x : Math.range( nCols ) ) {
+				items.get( i ).setRect( Rect( left, left + sx, bottom, top ) );
+				left = left + ( sx + xBorder );
+				i = i + 1;
+			}
+			top = bottom - yBorder;
+			bottom = top - sy;
+		}
+		left = xBorder + ( ( ( nCols * nRows ) - nItems ) * ( .5 * ( sx + xBorder ) ) );
+		for ( x : Math.range( nItems - ( nCols * ( nRows - 1 ) ) ) ) {
+			items.get( i ).setRect( Rect( left, left + sx, bottom, top ) );
+			left = left + ( sx + xBorder );
+			i = i + 1;
+		}
+	}
+
+	def update( state ) {
+		state.addTask( Layout.bg );
+		for ( item : this.items ) {
+			item.update( state );
+		}
+
+		for ( event : state.getEvents( 'mouse' ) ) {
+			action = event.getAction();
+			data = event.getData();
+
+			if ( action == 'position' ) {
+				for ( item : this.items ) {
+					if ( item.contains( data ) ) {
+						item.highlight();
+					} else {
+						item.unhighlight();
+					}
+				}
+				this.pos = data;
+			} elif ( action == 'up' ) {
+				if ( data == 'left' ) {
+					for ( item : this.items ) {
+						if ( item.contains( this.pos ) ) {
+							active = Loader.scriptHandler.ScriptHandler( item.script );
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+class Item {
+	def __init__( text, img, script ) {
+		this.text = LabelTask( text=text, color=Color( 0, 0, 0 ), justify='centre' );
+		this.pic = PanelTask( source=Texture( file=img ),
+				shader=Shader( vp='shaders/colmap.vp', fp='shaders/colmapFlipY.fp' ) );
+		this.script = script;
+	}
+
+	def setRect( rect ) {
+		div = rect.top - ( rect.getHeight() * .15 );
+		this.text.setRect( Rect( rect.left, rect.right, div + .01, rect.top ) );
+		this.rect = Rect( rect.left, rect.right, rect.bottom, div );
+		this.pic.setDstRect( this.rect );
+	}
+
+	def contains( pos ) {
+		return this.rect.contains( pos );
+	}
+
+	def highlight() {
+		this.pic.setDstRect( Rect( this.rect.left - .01, this.rect.right + .01,
+				this.rect.bottom - .01, this.rect.top + .01 ) );
+	}
+
+	def unhighlight() {
+		this.pic.setDstRect( this.rect );
+	}
+
+	def update( state ) {
+		state.addTask( this.text );
+		state.addTask( this.pic );
+	}
+}
+
+static layout = null;
+
+def update( state ) {
+	if ( null != Loader.scriptHandler ) {
+		if ( active != null ) {
+			active.update( state );
+
+			/* esc pressed */
+			for ( event : state.getEvents( 'key' ) ) {
+				if ( event.getAction() == 'down' ) {
+					if ( event.getData() == 'escape' ) {
+						active = null;
+					}
+				}
+			}
+		} else {
+			if ( layout == null ) {
+				layout = Layout( List(
+						Item( 'Tutorial 1', 'tutorials/tut1.jpg', 'tutorials/tut1.script' ),
+						Item( 'Tutorial 2', 'tutorials/tut2.jpg', 'tutorials/tut2.script' ),
+						Item( 'Tutorial 3', 'tutorials/tut3.jpg', 'tutorials/tut3.script' ),
+						Item( 'Tutorial 4', 'tutorials/tut4.jpg', 'tutorials/tut4.script' ),
+						Item( 'Tutorial 5', 'tutorials/tut5.jpg', 'tutorials/tut5.script' ) ) );
+			}
+			layout.update( state );
+		}
+	}
+}

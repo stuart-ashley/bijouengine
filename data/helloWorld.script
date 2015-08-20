@@ -1,0 +1,5 @@
+def update( state ) {
+		text = "Hello world\n";
+		label = LabelTask( text=text, justify="centre", rect=Rect( 0, 1, 0, .1 ) );
+		state.addTask( label );
+}

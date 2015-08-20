@@ -1,0 +1,1120 @@
+/* icosphere class */
+class Icosphere {
+    /* icosahedron vertices */
+    static icosahedronVertices = List( Vec3( -1, 1.618, 0 ), Vec3( 1, 1.618, 0 ),
+            Vec3( -1, -1.618, 0 ), Vec3( 1, -1.618, 0 ), Vec3( 0, -1, 1.618 ),
+            Vec3( 0, 1, 1.618 ), Vec3( 0, -1, -1.618 ), Vec3( 0, 1, -1.618 ),
+            Vec3( 1.618, 0, -1 ), Vec3( 1.618, 0, 1 ), Vec3( -1.618, 0, -1 ),
+            Vec3( -1.618, 0, 1 ) );
+
+    /* icosahedron edge vertex indices */
+    static icosahedronEdgeVertexIndices = List( 0, 11, 0, 5, 0, 1, 0, 7, 0, 10, 1,
+            5, 5, 11, 11, 10, 10, 7, 7, 1, 3, 9, 3, 4, 3, 2, 3, 6, 3, 8, 4, 9, 2,
+            4, 6, 2, 8, 6, 9, 8, 5, 9, 9, 1, 11, 4, 4, 5, 10, 2, 2, 11, 7, 6, 6,
+            10, 1, 8, 8, 7 );
+
+    /* icosahedron triangle edge indices */
+    static icosahedronTriangleEdgeIndices = List( 0, 6, 1, 1, 5, 2, 2, 9, 3,
+            3, 8, 4, 4, 7, 0, 5, 20, 21, 6, 22, 23, 7, 24, 25, 8, 26, 27, 9,
+            28, 29, 10, 15, 11, 11, 16, 12, 12, 17, 13, 13, 18, 14, 14, 19,
+            10, 15, 20, 23, 16, 22, 25, 17, 24, 27, 18, 26, 29, 19, 28, 21 );
+
+    /* constructor */
+    def __init__() {
+        this.vertices = Icosphere.icosahedronVertices;
+        this.edges = Icosphere.icosahedronEdgeVertexIndices;
+        this.triangles = Icosphere.icosahedronTriangleEdgeIndices;
+        this.colors = List();
+        for ( v : this.vertices ) {
+            x = Math.random() * .5;
+            this.colors.add( Color( x, x, 1, 1 ) );
+        }
+    }
+
+    /* from triangle edge indices and edge vertex indices,
+       construct triangle vertex indices */
+    def getTriangleVertexIndices() {
+        triangleVertexIndices = List();
+
+        for ( i : Math.range( 0, this.triangles.size(), 3 ) ) {
+            /* triangle edge indices */
+            tei0 = this.triangles.get( i );
+            tei1 = this.triangles.get( i + 1 );
+            tei2 = this.triangles.get( i + 2 );
+            /* triangle vertex indices */
+            te0vi0 = this.edges.get( tei0 * 2 );
+            te0vi1 = this.edges.get( ( tei0 * 2 ) + 1 );
+
+            te1vi0 = this.edges.get( tei1 * 2 );
+            te1vi1 = this.edges.get( ( tei1 * 2 ) + 1 );
+
+            if ( te0vi0 == te1vi0 ) {
+                tvi0 = te0vi1;
+                tvi1 = te0vi0;
+                tvi2 = te1vi1;
+            } elif ( te0vi0 == te1vi1 ) {
+                tvi0 = te0vi1;
+                tvi1 = te0vi0;
+                tvi2 = te1vi0;
+            } elif ( te0vi1 == te1vi0 ) {
+                tvi0 = te0vi0;
+                tvi1 = te0vi1;
+                tvi2 = te1vi1;
+            } else {
+                tvi0 = te0vi0;
+                tvi1 = te0vi1;
+                tvi2 = te1vi0;
+            }
+
+            triangleVertexIndices.add( tvi0 );
+            triangleVertexIndices.add( tvi1 );
+            triangleVertexIndices.add( tvi2 );
+        }
+        return triangleVertexIndices;
+    }
+
+    /* construct model node */
+    def getModel() {
+        return SgModel(
+            default=SgNode(
+                /* define vertices */
+                SgVertexAttribute( "a_position", this.vertices ),
+                /* define color */
+                SgVertexAttribute( "a_color", this.colors ),
+                /* specify default shader flags */
+                SgShader( flags=List( 'VERTEX_COLOR', 'UNLIT' ) ),
+                /* define triangle indices of cube */
+                SgIndexedTriangles( this.getTriangleVertexIndices() ) ) );
+    }
+
+    /* scale icosphere */
+    def scale( s ) {
+        vertices = List();
+
+        for ( v : this.vertices ) {
+            vertices.add( v * s );
+        }
+
+        this.vertices = vertices;
+    }
+
+    /* flip triangle winding order, ie turn inside out */
+    def flipTriangles() {
+        triangles = List();
+
+        for ( i : Math.range( 0, this.triangles.size(), 3 ) ) {
+            triangles.add( this.triangles.get( i ) );
+            triangles.add( this.triangles.get( i + 2 ) );
+            triangles.add( this.triangles.get( i + 1 ) );
+        }
+
+        this.triangles = triangles;
+    }
+
+    /* subdivide triangles, creating 4 triangles where there was 1 */
+    def subdivide() {
+        /* color variation scale */
+        s = 2 * Math.sqrt( this.triangles.size() /
+                Icosphere.icosahedronTriangleEdgeIndices.size() );
+        /* new edges */
+        edges = List();
+        /* copy existing vertices */
+        vertices = List();
+        vertices.addAll( this.vertices );
+        /* copy existing colors */
+        colors = List();
+        colors.addAll( this.colors );
+        /* run though edges */
+        for ( i : Math.range( 0, this.edges.size(), 2 ) ) {
+            /* get existing edge start and end index */
+            evi0 = this.edges.get( i );
+            evi1 = this.edges.get( i + 1 );
+
+            /* add edge start, midpoint index */
+            edges.add( evi0 );
+            edges.add( vertices.size() );
+            /* add midpoint, end index */
+            edges.add( vertices.size() );
+            edges.add( evi1 );
+
+            /* add midpoint vertex */
+            v = vertices.get( evi0 ) + vertices.get( evi1 );
+            v = ( v / v.magnitude() ) * 1.902;
+            vertices.add( v );
+
+            /* midpoint color */
+            c = ( colors.get( evi0 ) + colors.get( evi1 ) ) / 2;
+            x = ( Math.random() - .5 ) / s;
+            colors.add( c + Color( x, x, 1, 0 ) );
+        }
+
+        triangles = List();
+        for ( i : Math.range( 0, this.triangles.size(), 3 ) ) {
+            /* triangle edge indices */
+            tei0 = this.triangles.get( i );
+            tei1 = this.triangles.get( i + 1 );
+            tei2 = this.triangles.get( i + 2 );
+            /* triangle vertex indices */
+            te0vi0 = this.edges.get( tei0 * 2 );
+            te0vi1 = this.edges.get( ( tei0 * 2 ) + 1 );
+
+            te1vi0 = this.edges.get( tei1 * 2 );
+            te1vi1 = this.edges.get( ( tei1 * 2 ) + 1 );
+
+            te2vi0 = this.edges.get( tei2 * 2 );
+            te2vi1 = this.edges.get( ( tei2 * 2 ) + 1 );
+
+            /* new triangle edge indices */
+            if ( ( te0vi0 == te1vi0 ) || ( te0vi0 == te1vi1 ) ) {
+                nt1ei0 = tei0 * 2;
+                nt0ei0 = nt1ei0 + 1;
+            } else {
+                nt0ei0 = tei0 * 2;
+                nt1ei0 = nt0ei0 + 1;
+            }
+
+            if ( ( te1vi0 == te2vi0 ) || ( te1vi0 == te2vi1 ) ) {
+                nt2ei1 = tei1 * 2;
+                nt1ei1 = nt2ei1 + 1;
+            } else {
+                nt1ei1 = tei1 * 2;
+                nt2ei1 = nt1ei1 + 1;
+            }
+
+            if ( ( te2vi0 == te0vi0 ) || ( te2vi0 == te0vi1 ) ) {
+                nt0ei2 = tei2 * 2;
+                nt2ei2 = nt0ei2 + 1;
+            } else {
+                nt2ei2 = tei2 * 2;
+                nt0ei2 = nt2ei2 + 1;
+            }
+
+            /* new edge indices */
+            nei0 = edges.size() / 2;
+            nei1 = nei0 + 1;
+            nei2 = nei1 + 1;
+
+            /* new edges */
+            edges.add( this.vertices.size() + tei0 );
+            edges.add( this.vertices.size() + tei1 );
+            edges.add( this.vertices.size() + tei1 );
+            edges.add( this.vertices.size() + tei2 );
+            edges.add( this.vertices.size() + tei2 );
+            edges.add( this.vertices.size() + tei0 );
+
+            /* replacement triangles */
+            triangles.add( nt0ei0 );
+            triangles.add( nei2 );
+            triangles.add( nt0ei2 );
+
+            triangles.add( nt1ei0 );
+            triangles.add( nt1ei1 );
+            triangles.add( nei0 );
+
+            triangles.add( nei1 );
+            triangles.add( nt2ei1 );
+            triangles.add( nt2ei2 );
+
+            triangles.add( nei0 );
+            triangles.add( nei1 );
+            triangles.add( nei2 );
+        }
+
+        /* apply changes */
+        this.vertices = vertices;
+        this.edges = edges;
+        this.triangles = triangles;
+        this.colors = colors;
+    }
+}
+
+/* sphere model */
+static sphere = SgModel(
+    /* model default node */
+    default=SgNode(
+        /* vertices */
+        SgVertexAttribute( "a_position",
+            List( Vec3( -1, 1.618, 0 ), Vec3( 1, 1.618, 0 ),
+                Vec3( -1, -1.618, 0 ), Vec3( 1, -1.618, 0 ), Vec3( 0, -1, 1.618 ),
+                Vec3( 0, 1, 1.618 ), Vec3( 0, -1, -1.618 ), Vec3( 0, 1, -1.618 ),
+                Vec3( 1.618, 0, -1 ), Vec3( 1.618, 0, 1 ), Vec3( -1.618, 0, -1 ),
+                Vec3( -1.618, 0, 1 ) ) ),
+        /* color */
+        SgUniform( "Color", 0.8, 0, 0, 1 ),
+        /* vertex transform matrix */
+        SgUniform( "u_vertexTransform", Mat4( .1052632, 0, 0, 0,
+                0, .1052632, 0, 0, 0, 0, .1052632, 0, 0, 0, 0, 1 ) ),
+        /* shader flags */
+        SgShader( flags=List( 'VERTEX_TRANSFORM', 'COLOR', 'UNLIT' ) ),
+        /* triangle indices */
+        SgIndexedTriangles(
+            List( 0, 11, 5, 0, 5, 1, 0, 1, 7, 0, 7, 10, 0, 10, 11, 1, 5, 9, 5,
+                11, 4, 11, 10, 2, 10, 7, 6, 7, 1, 8, 3, 9, 4, 3, 4, 2, 3, 2,
+                6, 3, 6, 8, 3, 8, 9, 4, 9, 5, 2, 4, 11, 6, 2, 10, 8, 6, 7, 9,
+                8, 1 ) ) ) );
+
+/* wall class */
+class Wall {
+    /* wall block model */
+    static block = SgModel(
+        /* model default node */
+        default=SgNode(
+            /* vertices */
+            SgVertexAttribute( "a_position",
+                List( Vec3( -1, -1, -1 ), Vec3( -1, -1,  1 ), Vec3( -1,  1, -1 ),
+                    Vec3( -1,  1,  1 ), Vec3(  1, -1, -1 ), Vec3(  1, -1,  1 ),
+                    Vec3(  1,  1, -1 ), Vec3(  1,  1,  1 ) ) ),
+            /* shader flags */
+            SgShader( flags=List( 'COLOR', 'LAMBERT' ) ),
+            /* triangle indices */
+            SgIndexedTriangles(
+                List( 0, 1, 3, 0, 3, 2,
+                    0, 4, 5, 0, 5, 1,
+                    0, 2, 6, 0, 6, 4,
+                    1, 5, 7, 1, 7, 3,
+                    4, 6, 7, 4, 7, 5,
+                    2, 3, 7, 2, 7, 6 ) ) ) );
+
+    /* wall block collision bounds */
+    static bounds = Collision( BoundingBox( min=Vec3( -1, -1, -1 ), max=Vec3( 1, 1, 1 ) ) );
+
+    /* block colors */
+    static color0 = SgUniform( "Color", .8, 0, 0, 1 );
+    static color1 = SgUniform( "Color", 0, .8, 0, 1 );
+
+    /* wall constructor */
+    def __init__() {
+        /* create empty scene node */
+        this.graph = SgNode();
+        /* create empty map of block names to block node */
+        this.map = Map();
+        /* initial block color */
+        col = Wall.color0;
+        /* block index */
+        idx = 0;
+        /* x axis -20 to 20 inclusive in steps to 2 */
+        for ( x : Math.range( -20, 21, 2 ) ) {
+            /* z axis 1 to 11 inclusive in steps of 2 */
+            for ( z : Math.range( 1, 12, 2 ) ) {
+                /* block name */
+                name = 'block.' + idx;
+                /* increment block index */
+                idx = idx + 1;
+
+                /* swap colors */
+                if ( col == Wall.color0 ) {
+                    col = Wall.color1;
+                } else {
+                    col = Wall.color0;
+                }
+                /* block node of translation, collision and model */
+                node = SgNode(
+                        SgTranslate( Vec3( x, 0, z ) ),
+                        SgCollision( name, Wall.bounds ),
+                        col, Wall.block );
+                /* add block node to wall scene node*/
+                this.graph.append( node );
+                /* block name -> block node added to map */
+                this.map.put( name, node );
+            }
+            /* swap colors */
+            if ( col == Wall.color0 ) {
+                col = Wall.color1;
+            } else {
+                col = Wall.color0;
+            }
+        }
+    }
+
+    /* reset function */
+    def reset() {
+        /* re-enable blocks */
+        for ( node : this.map.getValues() ) {
+            node.enable();
+        }
+    }
+}
+
+/* tank class */
+class Tank {
+    /* tank base vertices */
+    static baseVertices = List(
+            Vec3( -3.5625, 2, -0.35 ), Vec3( -3.5625, -2, -0.35 ),
+            Vec3( -2.5625, -1.6, 0.25 ), Vec3( -2.5625, 1.6, 0.25 ),
+            Vec3( 2.4375, 1.6, 0.25 ), Vec3( 2.4375, 2, -0.35 ),
+            Vec3( 2.4375, -1.6, 0.25 ), Vec3( 2.4375, -2, -0.35 ),
+            Vec3( -3.5625, -2, -0.95 ), Vec3( -3.5625, 2, -0.95 ),
+            Vec3( -2.5625, 2, -1.55 ), Vec3( -2.5625, -2, -1.55 ),
+            Vec3( 2.4375, 2, -0.95 ), Vec3( 1.4375, 2, -1.55 ),
+            Vec3( 2.4375, -2, -0.95 ), Vec3( 1.4375, -2, -1.55 ) );
+
+    /* tank base triangle indices */
+    static baseIndices = List( 0, 1, 2, 0, 2, 3, 3, 4, 5, 3, 5, 0, 4, 6, 7, 4,
+            7, 5, 1, 7, 6, 1, 6, 2, 6, 4, 3, 6, 3, 2, 8, 9, 10, 8, 10, 11, 9,
+            12, 13, 9, 13, 10, 12, 14, 15, 12, 15, 13, 14, 8, 11, 14, 11, 15,
+            11, 10, 13, 11, 13, 15, 0, 5, 12, 0, 12, 9, 7, 1, 8, 7, 8, 14, 5,
+            7, 14, 5, 14, 12, 1, 0, 9, 1, 9, 8 );
+
+    /* tank base model */
+    static base = SgModel(
+        /* model default node */
+        default=SgNode(
+            /* vertices */
+            SgVertexAttribute( "a_position", Tank.baseVertices ),
+            /* color */
+            SgUniform( "Color", .5, .5, .1, 1 ),
+            /* shader flags */
+            SgShader( flags=List( 'COLOR', 'LAMBERT' ) ),
+            /* triangle indices */
+            SgIndexedTriangles( Tank.baseIndices ) ) );
+
+    /* tank base collision */
+    static baseCollision = Collision(
+        ConvexHull(
+            /* bounds */
+            bounds=BoundingBox( min=Vec3( -3.5625, -2, -1.55 ), max=Vec3( 2.4375, 2, 0.25 ) ),
+            /* vertices */
+            vertices=Vec3Array( Tank.baseVertices ),
+            /* triangle indices */
+            indices=IndexArray( Tank.baseIndices ),
+            /* face normals */
+            faceNormals=NormalArray( List( Normal( -0.514496, 0, 0.857493 ),
+                    Normal( -0, 0.83205, 0.5547 ), Normal( 1, 0, 0 ),
+                    Normal( 0, -0.83205, 0.5547 ), Normal( 0, -0, 1 ),
+                    Normal( -0.514496, 0, -0.857493 ), Normal( -0, 1, 0 ),
+                    Normal( 0.514496, 0, -0.857493 ), Normal( -0, -1, -0 ),
+                    Normal( 0, 0, -1 ), Normal( -1, 0, 0 ) ) ),
+            /* face planes, vertex index for each face normal */
+            planes=IndexArray( List( 0, 0, 4, 1, 2, 8, 0, 12, 1, 10, 0 ) ),
+            /* edges, a pair of vertex indices and pair of face normal indices for each edge */
+            edges=IndexArray( List( 0, 1, 0, 10, 0, 3, 0, 1, 1, 2, 0, 3, 2, 3, 0, 4, 0,
+                    5, 1, 6, 3, 4, 1, 4, 4, 5, 1, 2, 4, 6, 2, 4, 5, 12, 2, 6, 6, 7, 2, 3, 7,
+                    14, 2, 8, 12, 14, 2, 7, 1, 7, 3, 8, 2, 6, 3, 4, 8, 9, 5, 10, 8, 11, 5, 8,
+                    9, 10, 5, 6, 10, 11, 5, 9, 0, 9, 6, 10, 10, 13, 6, 9, 12, 13, 6, 7, 13,
+                    15, 7, 9, 14, 15, 7, 8, 1, 8, 8, 10, 11, 15, 8, 9 ) ),
+            /* unique face directions, index into face normals */
+            faceDirections=IndexArray( List( 0, 1, 2, 3, 4, 5, 6 ) ),
+            /* unique edge directions, index into edges */
+            edgeDirections=IndexArray( List( 0, 1, 2, 4, 6, 8, 9, 15, 20 ) ) ) );
+
+    /* gun model */
+    static gun = SgModel(
+        /* model default node */
+        default=SgNode(
+            /* vertices */
+            SgVertexAttribute( "a_position",
+                List( Vec3( 0, 0.2, 0 ), Vec3( 0, 0.2, 4 ),
+                    Vec3( 0.173205, 0.1, 0 ), Vec3( 0.173205, 0.1, 4 ),
+                    Vec3( 0.173205, -0.1, 0 ), Vec3( 0.173205, -0.1, 4 ),
+                    Vec3( 0, -0.2, 0 ), Vec3( 0, -0.2, 4 ),
+                    Vec3( -0.173205, -0.1, 0 ), Vec3( -0.173205, -0.1, 4 ),
+                    Vec3( -0.173205, 0.1, 0 ), Vec3( -0.173205, 0.1, 4 ) ) ),
+            /* color */
+            SgUniform( "Color", .5, .5, .1, 1 ),
+            /* shader flags */
+            SgShader( flags=List( 'COLOR', 'LAMBERT' ) ),
+            /* triangle indices */
+            SgIndexedTriangles(
+                List( 0, 1, 3, 0, 3, 2, 2, 3, 5, 2, 5, 4, 4, 5, 7, 4, 7, 6, 6, 7,
+                    9, 6, 9, 8, 3, 1, 11, 3, 11, 9, 3, 9, 5, 9, 7, 5, 1, 0, 10,
+                    1, 10, 11, 8, 9, 11, 8, 11, 10, 0, 2, 10, 2, 8, 10, 2, 4, 8,
+                    4, 6, 8 ) ) ) );
+
+    /* tank turret vertices */
+    static turretVertices = List(
+            Vec3( -1.95, 1.2, -0.3 ), Vec3( 1.85, 1.2, -0.3 ),
+            Vec3( 1.45, 0.8, -0.5 ), Vec3( -1.55, 0.8, -0.5 ),
+            Vec3( 1.85, -1.2, -0.3 ), Vec3( 1.45, -0.8, -0.5 ),
+            Vec3( -1.55, -0.8, -0.5 ), Vec3( -1.95, -1.2, -0.3 ),
+            Vec3( 1.85, 1.2, -0.1 ), Vec3( 1.85, -1.2, -0.1 ),
+            Vec3( 1.05, -0.8, 0.5 ), Vec3( -1.15, -0.8, 0.5 ),
+            Vec3( -1.95, -1.2, -0.1 ), Vec3( -1.95, 1.2, -0.1 ),
+            Vec3( -1.15, 0.8, 0.5 ), Vec3( 1.05, 0.8, 0.5 ) );
+
+    /* tank turret triangle indices */
+    static turretIndices = List( 0, 1, 2, 0, 2, 3, 1, 4, 5, 1, 5, 2, 6, 5, 4,
+            6, 4, 7, 6, 3, 2, 6, 2, 5, 8, 9, 4, 8, 4, 1, 10, 11, 12, 10, 12,
+            9, 13, 8, 1, 13, 1, 0, 9, 12, 7, 9, 7, 4, 11, 14, 13, 11, 13, 12,
+            14, 15, 8, 14, 8, 13, 12, 13, 0, 12, 0, 7, 15, 10, 9, 15, 9, 8,
+            10, 15, 14, 10, 14, 11, 6, 7, 0, 6, 0, 3 );
+
+    /* turret model */
+    static turret = SgModel(
+        /* model default node */
+        default=SgNode(
+            /* vertices */
+            SgVertexAttribute( "a_position", Tank.turretVertices ),
+            /* color */
+            SgUniform( "Color", .5, .5, .1, 1 ),
+            /* shader flags */
+            SgShader( flags=List( 'COLOR', 'LAMBERT' ) ),
+            /* triangle indices */
+            SgIndexedTriangles( Tank.turretIndices ) ) );
+
+    /* turret collision */
+    static turretCollision = Collision(
+        ConvexHull(
+            /* bounds */
+            bounds=BoundingBox( min=Vec3( -1.95, -1.2, -0.5 ), max=Vec3( 1.85, 1.2, 0.5 ) ),
+            /* vertices */
+            vertices=Vec3Array( Tank.turretVertices ),
+            /* triangle indices */
+            indices=IndexArray( Tank.turretIndices ),
+            /* face normals */
+            faceNormals=NormalArray( List( Normal( 0, 0.447214, -0.894427 ),
+                    Normal( 0.447214, 0, -0.894427 ), Normal( 0, -0.447214, -0.894427 ),
+                    Normal( 0, 0, -1 ), Normal( 1, 0, 0 ), Normal( 0, -0.83205, 0.5547 ),
+                    Normal( -0, 1, 0 ), Normal( -0, -1, -0 ), Normal( -0.6, 0, 0.8 ),
+                    Normal( -0, 0.83205, 0.5547 ), Normal( -1, 0, 0 ), Normal( 0.6, 0, 0.8 ),
+                    Normal( 0, -0, 1 ), Normal( -0.447214, 0, -0.894427 ) ) ),
+            /* face planes, vertex index for each face normal */
+            planes=IndexArray( List( 0, 1, 4, 2, 8, 9, 8, 9, 11, 8, 0, 8, 10, 0 ) ),
+            /* edges, a pair of vertex indices and pair of face normal indices for each edge */
+            edges=IndexArray( List( 0, 1, 0, 6, 0, 3, 0, 13, 1, 2, 0, 1, 2, 3, 0, 3, 1,
+                    4, 1, 4, 2, 5, 1, 3, 4, 5, 1, 2, 4, 7, 2, 7, 5, 6, 2, 3, 6, 7, 2, 13, 3,
+                    6, 3, 13, 8, 9, 4, 11, 8, 1, 4, 6, 9, 4, 4, 7, 9, 10, 5, 11, 9, 12, 5, 7,
+                    10, 11, 5, 12, 11, 12, 5, 8, 8, 13, 6, 9, 13, 0, 6, 10, 12, 7, 7, 10, 11,
+                    14, 8, 12, 12, 13, 8, 10, 13, 14, 8, 9, 8, 15, 9, 11, 14, 15, 9, 12, 0, 7,
+                    10, 13, 10, 15, 11, 12 ) ),
+            /* unique face directions, index into face normals */
+            faceDirections=IndexArray( List( 0, 1, 2, 3, 4, 5, 6, 8, 9, 11, 13 ) ),
+            /* unique edge directions, index into edges */
+            edgeDirections=IndexArray( List( 0, 1, 2, 4, 6, 9, 12, 14, 17, 23, 24 ) ) ) );
+
+    /* tank constructor */
+    def __init__( id, position, rotation ) {
+        /* postfix to make names unique */
+        this.postfix = id.format( 0, 0 );
+
+        /* angle of turret */
+        this.turretAngle = Math.pi / -2;
+        this.turretRotation = SgRotate( Quat( 0, 0, -.70710671, .70710671 ) );
+
+        /* angle of gun */
+        this.gunAngle = Math.pi * -.5;
+        this.gunRotation = SgRotate( Quat( Math.cos( this.gunAngle * .5 ), 0, 0,
+                Math.sin( this.gunAngle * .5 ) ) );
+
+        /* set shell to null */
+        this.shell = null;
+
+        /* tank camera */
+        this.camera = SgCamera( "tank.camera." + this.postfix );
+
+        /* copy initial position and rotation */
+        this.origPosition = position;
+        this.origRotation = rotation;
+
+        /* create translate and rotate scene elements */
+        this.translation = SgTranslate( position );
+        this.rotation = SgRotate( rotation );
+
+        /* create tank scene node */
+        this.graph = SgNode(
+            /* tank translation */
+            this.translation,
+            /* tank rotation */
+            this.rotation,
+            /* position and add tank camera */
+            SgNode(
+                SgTranslate( Vec3( 0, -10, 4.5 ) ),
+                SgRotate( Quat( .70710671, 0, 0, .70710671 ) ),
+                this.camera ),
+            /* tank */
+            SgNode(
+                /* tank base translation, collision and model */
+                SgTranslate( Vec3( .3, 0, 1.55 ) ),
+                SgCollision( "base." + this.postfix, Tank.baseCollision ),
+                Tank.base,
+                SgNode(
+                    /* tank turret translation, rotation, collision and model */
+                    SgTranslate( Vec3( -.3, -.05, .75 ) ), this.turretRotation,
+                    SgCollision( "turret." + this.postfix, Tank.turretCollision ),
+                    Tank.turret,
+                    SgNode(
+                        /* tank gun translation, rotation and model */
+                        SgTranslate( Vec3( -1.268, 0, .1 ) ),
+                        SgRotate( Quat( 0, 0, .707, .707 ) ),
+                        this.gunRotation, Tank.gun ) ) ) );
+    }
+
+    /* move left function */
+    def moveLeft() {
+        /* calculate translation */
+        t = this.translation.getTranslation();
+        t = t - ( this.rotation.getRotation() * ( Vec3( 1, 0, 0 ) * System.step ) );
+        /* clamp to world coordinates */
+        t.x = Math.clamp( t.x, -15, 15 );
+        /* set altered translation*/
+        this.translation.setTranslation( t );
+    }
+
+    /* move right function */
+    def moveRight() {
+        /* calculate translation */
+        t = this.translation.getTranslation();
+        t = t + ( this.rotation.getRotation() * ( Vec3( 1, 0, 0 ) * System.step ) );
+        /* clamp to world coordinates */
+        t.x = Math.clamp( t.x, -15, 15 );
+        /* set altered translation*/
+        this.translation.setTranslation( t );
+    }
+
+    /* rotate turret left */
+    def turretLeft() {
+        /* calculate new angle */
+        this.turretAngle = this.turretAngle - ( ( Math.pi * System.step ) / 5 );
+        /* clamp angle */
+        this.turretAngle = Math.clamp( this.turretAngle, -Math.pi, 0 );
+        /* set rotation */
+        this.turretRotation.setRotation( Quat( 0, 0, Math.cos( this.turretAngle * .5 ),
+            Math.sin( this.turretAngle * .5 ) ) );
+    }
+
+    /* rotate turret right */
+    def turretRight() {
+        /* calculate new angle */
+        this.turretAngle = this.turretAngle + ( ( Math.pi * System.step ) / 5 );
+        /* clamp angle */
+        this.turretAngle = Math.clamp( this.turretAngle, -Math.pi, 0 );
+        /* set rotation */
+        this.turretRotation.setRotation( Quat( 0, 0, Math.cos( this.turretAngle * .5 ),
+            Math.sin( this.turretAngle * .5 ) ) );
+    }
+
+    /* rotate gun up */
+    def gunUp() {
+        /* calculate new angle */
+        this.gunAngle = this.gunAngle - ( ( Math.pi * System.step ) / 5 );
+        /* clamp angle */
+        this.gunAngle = Math.clamp( this.gunAngle, Math.pi * -.75, Math.pi * -.5 );
+        /* set rotation */
+        this.gunRotation.setRotation( Quat( Math.cos( this.gunAngle * .5 ), 0, 0,
+            Math.sin( this.gunAngle * .5 ) ) );
+    }
+
+    /* rotate gun down */
+    def gunDown() {
+        /* calculate new angle */
+        this.gunAngle = this.gunAngle + ( ( Math.pi * System.step ) / 5 );
+        /* clamp angle */
+        this.gunAngle = Math.clamp( this.gunAngle, Math.pi * -.75, Math.pi * -.5 );
+        /* set rotation */
+        this.gunRotation.setRotation( Quat( Math.cos( this.gunAngle * .5 ), 0, 0,
+            Math.sin( this.gunAngle * .5 ) ) );
+    }
+
+    /* fire gun */
+    def fire() {
+        if ( this.shell != null ) {
+            return;
+        }
+
+        pos = this.translation.getTranslation();
+        r = this.rotation.getRotation();
+        pos = pos + ( r * Vec3( .3, 0, 1.55 ) );
+        pos = pos + ( r * Vec3( -.3, -.05, .75 ) );
+        r = r * this.turretRotation.getRotation();
+        pos = pos + ( r * Vec3( -1.268, 0, .1 ) );
+        r = r * Quat( 0, 0, .707, .707 );
+        r = r * this.gunRotation.getRotation();
+        pos = pos + ( r * Vec3( 0, 0, 4 ) );
+
+        vel = r * Vec3( 0, 0, 40 );
+
+        this.shell = SgRigidBody( name="shell." + this.postfix, inverseMass=1,
+            translation=pos,
+            rotation=Quat( 0, 0, 0, 1 ),
+            velocity=vel,
+            collision=Collision( Sphere( Vec3( 0, 0, 0 ), .2 ) ),
+            model=sphere );
+        this.graph.append( this.shell );
+    }
+
+    /* destroy shell, return true if successful, false otherwise */
+    def destroyShell( name ) {
+        /* check shell exists */
+        if ( this.shell == null ) {
+            return false;
+        }
+        /* check shell name */
+        if ( name == this.shell.getName() ) {
+            /* remove shell from tank scene node */
+            this.graph.remove( this.shell );
+            /* set shell to null */
+            this.shell = null;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /* check height of shell, remove if required */
+    def checkShellHeight() {
+        /* checll shell not null */
+        if ( this.shell != null ) {
+            /* compare shell height to z */
+            if ( this.shell.getTranslation().z < 0 ) {
+                /* remove shell from scene node */
+                this.graph.remove( this.shell );
+                /* set shell to null */
+                this.shell = null;
+            }
+        }
+    }
+
+    /* reset function */
+    def reset() {
+        /* reset turret angle */
+        this.turretAngle = Math.pi / -2;
+        /* set turret rotate element */
+        this.turretRotation.setRotation( Quat( 0, 0, Math.cos( this.turretAngle * .5 ),
+            Math.sin( this.turretAngle * .5 ) ) );
+
+        /* reset gun angle */
+        this.gunAngle = Math.pi * -.5;
+        /* set gun rotate element */
+        this.gunRotation.setRotation( Quat( Math.cos( this.gunAngle * .5 ), 0, 0,
+            Math.sin( this.gunAngle * .5 ) ) );
+
+        /* check for shell */
+        if ( this.shell != null ) {
+            /* remove shell from scene node */
+            this.graph.remove( this.shell );
+            /* set shell to null */
+            this.shell = null;
+        }
+
+        /* set tank to initial transform */
+        this.translation.setTranslation( this.origPosition );
+        this.rotation.setRotation( this.origRotation );
+    }
+}
+
+/* world class */
+class World {
+    /* world constructor */
+    def __init__() {
+        /* create sky */
+        skySphere = Icosphere();
+        skySphere.subdivide();
+        skySphere.subdivide();
+        skySphere.subdivide();
+        skySphere.subdivide();
+        skySphere.subdivide();
+        skySphere.scale( 100 );
+        skySphere.flipTriangles();
+
+        /* create wall */
+        this.wall = Wall();
+        /* create tank 1 */
+        this.tank1 = Tank( 1, Vec3( 0, -30, 0 ), Quat( 0, 0, 0, 1 ) );
+        /* create tank 2 */
+        this.tank2 = Tank( 2, Vec3( 0, 30, 0), Quat( 0, 0, 1, 0 ) );
+
+        /* create world scene node */
+        this.graph = SgNode(
+            /* sky */
+            skySphere.getModel(),
+            /* spherical harmonic lighting */
+            SgIrradianceVolume(
+                size=Vec3( 1, 1, 1 ),
+                values=List(
+                     0.435649,  0.437611,  0.432235,
+                     0.087529,  0.122668,  0.156446,
+                     0.017338,  0.018054,  0.018681,
+                    -0.002315, -0.014724, -0.024014,
+                    -0.060268, -0.060580, -0.058754,
+                     0.001621,  0.001812,  0.003756,
+                    -0.014334, -0.012463, -0.010499,
+                    -0.038770, -0.043163, -0.045796,
+                    -0.080892, -0.095892, -0.109576 ) ),
+            /* ground model */
+            SgModel(
+                /* model default node */
+                default=SgNode(
+                    /* vertices */
+                    SgVertexAttribute( "a_position",
+                        List( Vec3( -21, -40, 0 ), Vec3( 21, -40, 0 ),
+                            Vec3( 21, 40, 0 ), Vec3( -21, 40, 0 ) ) ),
+                    /* color */
+                    SgUniform( "Color", 0, .8, 0, 1 ),
+                    /* shader flags */
+                    SgShader( flags=List( 'COLOR', 'LAMBERT' ) ),
+                    /* triangle indices */
+                    SgIndexedTriangles( List( 0, 1, 2, 0, 2, 3 ) ) ) ),
+            /* tank 1 */
+            this.tank1.graph,
+            /* tank 2 */
+            this.tank2.graph,
+            /* wall */
+            this.wall.graph );
+    }
+
+    /* reset wall, tank 1 and 2 */
+    def reset() {
+        this.wall.reset();
+        this.tank1.reset();
+        this.tank2.reset();
+    }
+}
+
+/* controls class */
+class Controls {
+    /* controls constructor */
+    def __init__( left, right, turretLeft, turretRight, gunUp, gunDown, fire ) {
+        this.left = left;
+        this.right = right;
+        this.turretLeft = turretLeft;
+        this.turretRight = turretRight;
+        this.gunUp = gunUp;
+        this.gunDown = gunDown;
+        this.fire = fire;
+    }
+}
+
+/* player class */
+class Player {
+    /* player constructor */
+    def __init__( player, rect, world, tank, controls ) {
+        /* set tank */
+        this.tank = tank;
+        /* set constrols */
+        this.controls = controls;
+
+        /* score */
+        this.score = 0;
+        /* score text */
+        this.scoreLabel = LabelTask( text='Score:' + this.score.format( 0, 0 ),
+                rect=Rect( rect.left, rect.right, .95, 1 ), level=999 );
+        /* games won */
+        this.games = 0;
+        /* games won text */
+        this.gamesLabel = LabelTask( text='Games:' + this.games.format( 0, 0 ),
+                justify='right', rect=Rect( rect.left, rect.right, .95, 1 ), level=999 );
+
+        /* ready status */
+        this.ready = false;
+        /* game done status */
+        this.done = false;
+
+        /* key repeat flags */
+        this.moveLeft = false;
+        this.moveRight = false;
+        this.turretLeft = false;
+        this.turretRight = false;
+        this.gunUp = false;
+        this.gunDown = false;
+
+        /* title text */
+        w = rect.getWidth();
+        h = rect.getHeight();
+        lt = rect.left + ( w * .1 );
+        rt = rect.right - ( w * .1 );
+
+        tr = Rect( lt, rt, rect.top - ( h * .1 ), rect.top );
+        ir = Rect( lt, rt, rect.bottom, rect.top - ( h * .1 ) );
+        pr = Rect( lt, rt, rect.bottom, rect.bottom + ( h * .1 ) );
+        wr = Rect( lt, rt, rect.bottom + ( h * .45 ), rect.top - ( h * .45 ) );
+        wlr = Rect( lt, rt, rect.bottom + ( h * .35 ), rect.top - ( h * .35 ) );
+
+        this.playerTitle = LabelTask( text='Player ' + player.format( 0, 0 ),
+                justify='centre', rect=tr );
+
+        /* instructions text */
+        instr = controls.left + ' - left\n';
+        instr = instr + ( controls.right + ' - right\n' );
+        instr = instr + ( controls.turretLeft + ' - turret left\n' );
+        instr = instr + ( controls.turretRight + ' - turret right\n' );
+        instr = instr + ( controls.gunUp + ' - gun up\n' );
+        instr = instr + ( controls.gunDown + ' - gun down\n' );
+        instr = instr + ( controls.fire + ' - fire\n' );
+        this.instructions = LabelTask( text=instr, rect=ir );
+
+        /* press fire text */
+        this.pressFire = LabelTask( text='press fire', justify='centre', rect=pr, level=999 );
+
+        /* waiting text */
+        this.wait = LabelTask( text='Waiting for player ' + ( 3 - player ).format( 0, 0 ), rect=wr );
+
+        /* win text */
+        this.win = LabelTask( text='You\nWin', justify='centre', rect=wlr, level=999 );
+
+        /* lose text */
+        this.lose = LabelTask( text='You\nLose', justify='centre', rect=wlr, level=999 );
+
+        /* view */
+        this.view = ViewTask( camera=this.tank.camera, root=world.graph, rect=rect );
+    }
+
+    /* add to score, update score text */
+    def addScore( points ) {
+        this.score = this.score + points;
+        this.scoreLabel.setText( 'Score:' + this.score.format( 0, 0 ) );
+    }
+
+    /* increment games won, update games won text */
+    def incGames() {
+        this.games = this.games + 1;
+        this.gamesLabel.setText( 'Games:' + this.games.format( 0, 0 ) );
+    }
+
+    /* display instructions, until fire pressed */
+    def begin( state ) {
+        /* display title text */
+        state.addTask( this.playerTitle );
+        /* check ready */
+        if ( this.ready ) {
+            /* display waiting text */
+            state.addTask( this.wait );
+        } else {
+            /* display instructions */
+            state.addTask( this.instructions );
+            /* display press fire text */
+            state.addTask( this.pressFire );
+
+            /* check if fire pressed */
+            for ( event : state.getEvents( 'key' ) ) {
+                if ( event.getAction() == 'up' ) {
+                    if ( event.getData() == this.controls.fire ) {
+                        this.ready = true;
+                    }
+                }
+            }
+        }
+    }
+
+    /* play */
+    def play( state ) {
+        /* check keys */
+        for ( event : state.getEvents( 'key' ) ) {
+            action = event.getAction();
+            data = event.getData();
+            if ( data == this.controls.left ) {
+                this.moveLeft = ( action == 'down' );
+            } elif ( data == this.controls.right ) {
+                this.moveRight = ( action == 'down' );
+            } elif ( data == this.controls.turretLeft ) {
+                this.turretLeft = ( action == 'down' );
+            } elif ( data == this.controls.turretRight ) {
+                this.turretRight = ( action == 'down' );
+            } elif ( data == this.controls.gunUp ) {
+                this.gunUp = ( action == 'down' );
+            } elif ( data == this.controls.gunDown ) {
+                this.gunDown = ( action == 'down' );
+            } elif ( data == this.controls.fire ) {
+                if ( action == 'up' ) {
+                    /* fire key released */
+                    this.tank.fire();
+                }
+            }
+        }
+
+        /* move left held down */
+        if ( this.moveLeft ) {
+            this.tank.moveLeft();
+        }
+        /* move right held down */
+        if ( this.moveRight ) {
+            this.tank.moveRight();
+        }
+        /* turret left held down */
+        if ( this.turretLeft ) {
+            this.tank.turretLeft();
+        }
+        /* turret right held down */
+        if ( this.turretRight ) {
+            this.tank.turretRight();
+        }
+        /* gun up held down */
+        if ( this.gunUp ) {
+            this.tank.gunUp();
+        }
+        /* gun down held down */
+        if ( this.gunDown ) {
+            this.tank.gunDown();
+        }
+
+        /* destroy shell if dropped below ground level */
+        this.tank.checkShellHeight();
+
+        /* fix camera aspect */
+        this.tank.camera.setAspectRatio( ( this.view.getRect().getWidth() * System.width )
+                / ( this.view.getRect().getHeight() * System.height ) );
+        /* display view, score text and games won text */
+        state.addTask( this.view );
+        state.addTask( this.scoreLabel );
+        state.addTask( this.gamesLabel );
+    }
+
+    /* won */
+    def won( state ) {
+        /* fix camera aspect */
+        this.tank.camera.setAspectRatio( ( this.view.getRect().getWidth() * System.width )
+                / ( this.view.getRect().getHeight() * System.height ) );
+        /* display view, score text, games won text, won text and press fire text */
+        state.addTask( this.view );
+        state.addTask( this.scoreLabel );
+        state.addTask( this.gamesLabel );
+        state.addTask( this.win );
+        state.addTask( this.pressFire );
+
+        /* check if fire pressed */
+        for ( event : state.getEvents( 'key' ) ) {
+            if ( event.getAction() == 'up' ) {
+                if ( event.getData() == this.controls.fire ) {
+                    this.done = true;
+                }
+            }
+        }
+    }
+
+    /* lost */
+    def lost( state ) {
+        /* fix camera aspect */
+        this.tank.camera.setAspectRatio( ( this.view.getRect().getWidth() * System.width )
+                / ( this.view.getRect().getHeight() * System.height ) );
+        /* display view, score text, games won text, lost text and press fire text */
+        state.addTask( this.view );
+        state.addTask( this.scoreLabel );
+        state.addTask( this.gamesLabel );
+        state.addTask( this.lose );
+        state.addTask( this.pressFire );
+
+        /* check if fire pressed */
+        for ( event : state.getEvents( 'key' ) ) {
+            if ( event.getAction() == 'up' ) {
+                if ( event.getData() == this.controls.fire ) {
+                    this.done = true;
+                }
+            }
+        }
+    }
+
+    /* reset function */
+    def reset() {
+        /* reset key repeat flags */
+        this.moveLeft = false;
+        this.moveRight = false;
+        this.turretLeft = false;
+        this.turretRight = false;
+        this.gunUp = false;
+        this.gunDown = false;
+
+        /* reset ready status */
+        this.ready = false;
+        /* reset game done status */
+        this.done = false;
+        /* reset score */
+        this.score = 0;
+        /* reset score text */
+        this.scoreLabel.setText( 'Score:' + this.score.format( 0, 0 ) );
+    }
+}
+
+/* game class */
+class Game {
+    /* score needed to win game */
+    static targetScore = 100;
+
+    /* game constructor */
+    def __init__() {
+        /* create world */
+        this.world = World();
+        /* create player 1 */
+        this.player1 = Player( 1, Rect( 0, .499, 0, 1 ), this.world, this.world.tank1,
+                Controls( 'a', 'd', 'q', 'e', 'w', 's', 'x' ) );
+        /* create player 2 */
+        this.player2 = Player( 2, Rect( .501, 1, 0, 1 ), this.world, this.world.tank2,
+                Controls( 'k', ';', 'i', 'p', 'o', 'l', '.' ) );
+    }
+
+    /* update function */
+    def update( state ) {
+        /* check if game over */
+        if ( this.player1.done || this.player2.done ) {
+            if ( this.player1.score > Game.targetScore ) {
+                /* increment player 1 games won */
+                this.player1.incGames();
+            } elif ( this.player2.score > Game.targetScore ) {
+                /* increment player 2 games won */
+                this.player2.incGames();
+            }
+            /* reset world, player 1 and 2 */
+            this.player1.reset();
+            this.player2.reset();
+            this.world.reset();
+        }
+        /* check player 1 and 2 ready to play */
+        if ( this.player1.ready && this.player2.ready ) {
+            /* has player 1 won */
+            if ( this.player1.score > Game.targetScore ) {
+                this.player1.won( state );
+                this.player2.lost( state );
+            /* has player 2 won */
+            } elif ( this.player2.score > Game.targetScore ) {
+                this.player2.won( state );
+                this.player1.lost( state );
+            } else {
+                /* play game */
+                this.player1.play( state );
+                this.player2.play( state );
+            }
+        } else {
+            /* display instructions */
+            this.player1.begin( state );
+            this.player2.begin( state );
+        }
+
+        /* look for shell collisions */
+        for ( event : state.getEvents( 'collision' ) ) {
+            if ( event.getBody0().startsWith( 'shell' ) ) {
+                this.doShellCollision( event.getBody0(), event.getBody1() );
+            } elif ( event.getBody0().startsWith( 'shell' ) ) {
+                this.doShellCollision( event.getBody1(), event.getBody0() );
+            }
+        }
+    }
+
+    /* shell collision */
+    def doShellCollision( shell, target ) {
+        /* attempt to find wall block with target name */
+        node = this.world.wall.map.get( target );
+        if ( node != null ) {
+            /* disable wall block */
+            node.disable();
+            /* check if player 1 shell, if so destroy shell */
+            if ( this.player1.tank.destroyShell( shell ) ) {
+                /* increment player 1 score */
+                this.player1.addScore( 1 );
+            }
+            /* check if player 2 shell, if so destroy shell */
+            if ( this.player2.tank.destroyShell( shell ) ) {
+                /* increment player 1 score */
+                this.player2.addScore( 1 );
+            }
+        } else {
+            /* check target player 1 */
+            if ( target.endsWith( '1' ) ) {
+                /* 10 points to player 2 */
+                this.player2.addScore( 10 );
+            /* check target player 2 */
+            } elif ( target.endsWith( '2' ) ) {
+                /* 10 points to player 1 */
+                this.player1.addScore( 10 );
+            }
+            /* destroy shell */
+            this.player1.tank.destroyShell( shell );
+            this.player2.tank.destroyShell( shell );
+        }
+    }
+}
+
+/* create game */
+static game = Game();
+
+/* update routine */
+def update( state ) {
+    /* update game */
+    game.update( state );
+}

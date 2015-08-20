@@ -1,0 +1,9 @@
+sceneFile="tutorials/tutorials.script";
+width=1024;
+height=640;
+debug=false;
+sunShadow="CASCADE_PCF_SHADOWS";
+loadManager="threaded";
+showCollisions=false;
+showProjectedKaleidoscopes=false;
+showProjectedTextures=false;

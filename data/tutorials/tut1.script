@@ -1,0 +1,54 @@
+/* create static variable of type SgModel */
+static myCube = SgModel(
+    /* assign node to default model parameter */
+    default=SgNode(
+        /* define vertices of cube */
+        SgVertexAttribute( "a_position",
+            List( Vec3( -1, -1, -1 ), Vec3( -1, -1,  1 ), Vec3( -1,  1, -1 ),
+                Vec3( -1,  1,  1 ), Vec3(  1, -1, -1 ), Vec3(  1, -1,  1 ),
+                Vec3(  1,  1, -1 ), Vec3(  1,  1,  1 ) ) ),
+        /* define color uniform */
+        SgUniform( "Color", 0.8, 0, 0, 1 ),
+        /* specify flags for default shader */
+        SgShader( flags=List( 'COLOR', 'LAMBERT' ) ),
+        /* define triangle indices of cube */
+        SgIndexedTriangles(
+            List( 0, 1, 3, 0, 3, 2,
+                0, 4, 5, 0, 5, 1,
+                0, 2, 6, 0, 6, 4,
+                1, 5, 7, 1, 7, 3,
+                4, 6, 7, 4, 7, 5,
+                2, 3, 7, 2, 7, 6 ) ) ) );
+
+/* create camera */
+static myCamera = SgCamera( "camera" );
+
+/* create scene graph */
+static myGraph = SgNode(
+    SgNode(
+        /* rotation */
+        SgRotate( Quat( 0.375218, 0.100259, 0.677608, 0.624505 ) ),
+        /* translation */
+        SgTranslate( Vec3( 0, 0, 10 ) ),
+        /* my camera */
+        myCamera
+    ),
+    SgNode(
+        /* rotation */
+        SgRotate( Quat( 0.375218, 0.100259, 0.677608, 0.624505 ) ),
+        /* sunlight */
+        SgSunlight( color=Color( 1, 1, 1 ) )
+    ),
+    /* my cube */
+    myCube );
+
+/* create view task, specifying camera and scene graph */
+static myView = ViewTask( camera=myCamera, root=myGraph );
+
+/* update routine */
+def update( state ) {
+    /* match camera aspect ratio to window */
+    myCamera.setAspectRatio( System.width / System.height );
+    /* add view task to state */
+    state.addTask( myView );
+}

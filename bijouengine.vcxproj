@@ -1,0 +1,528 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{541C6A90-4F10-48A3-9EAC-FB4A178A43C7}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>EXPLICIT=;OVERRIDE=;PRIVATE=;PROTECTED=;STATIC=;VIRTUAL=;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)External\GLEW\include;$(ProjectDir)External\DevIL\include</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>glew32.lib;DevIL.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\GLEW\lib;$(ProjectDir)External\DevIL\lib</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)External\GLEW\lib\Win32\glew32.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)External\DevIL\lib\x86\ILU.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)External\DevIL\lib\x86\DevIL.dll" "$(OutDir)"
+xcopy /y /s /d "$(ProjectDir)data\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>EXPLICIT=;OVERRIDE=;PRIVATE=;PROTECTED=;STATIC=;VIRTUAL=;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(ProjectDir)External\GLEW\include;$(ProjectDir)External\DevIL\include</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalDependencies>glew32.lib;ILU.lib;DevIL.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\GLEW\lib\x64;$(ProjectDir)External\DevIL\lib\x64</AdditionalLibraryDirectories>
+      <ForceSymbolReferences>
+      </ForceSymbolReferences>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)External\GLEW\lib\x64\glew32.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)External\DevIL\lib\x64\ILU.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)External\DevIL\lib\x64\DevIL.dll" "$(OutDir)"
+xcopy /y /s /d "$(ProjectDir)data\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>EXPLICIT=;OVERRIDE=;PRIVATE=;PROTECTED=;STATIC=;VIRTUAL=;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(ProjectDir)External\GLEW\include;$(ProjectDir)External\DevIL\include</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>glew32.lib;ILU.lib;DevIL.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\GLEW\lib\Win32;$(ProjectDir)External\DevIL\lib\x86</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)External\GLEW\lib\Win32\glew32.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)External\DevIL\lib\x86\ILU.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)External\DevIL\lib\x86\DevIL.dll" "$(OutDir)"
+xcopy /y /s /d "$(ProjectDir)data\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>EXPLICIT=;OVERRIDE=;PRIVATE=;PROTECTED=;STATIC=;VIRTUAL=;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <AdditionalIncludeDirectories>$(ProjectDir)External\GLEW\include;$(ProjectDir)External\DevIL\include</AdditionalIncludeDirectories>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <OmitFramePointers>false</OmitFramePointers>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>glew32.lib;ILU.lib;DevIL.lib;opengl32.lib;glu32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\GLEW\lib\x64;$(ProjectDir)External\DevIL\lib\x64</AdditionalLibraryDirectories>
+      <ForceSymbolReferences>
+      </ForceSymbolReferences>
+    </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)External\GLEW\lib\x64\glew32.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)External\DevIL\lib\x64\ILU.dll" "$(OutDir)"
+xcopy /y /d "$(ProjectDir)External\DevIL\lib\x64\DevIL.dll" "$(OutDir)"
+xcopy /y /s /d "$(ProjectDir)data\*" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ResourceCompile Include="bijouengine.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\core\abstractSpotlight.cxx" />
+    <ClCompile Include="src\core\animation.cxx" />
+    <ClCompile Include="src\core\aspect.cxx" />
+    <ClCompile Include="src\core\bezier.cxx" />
+    <ClCompile Include="src\core\binary.cxx" />
+    <ClCompile Include="src\core\binaryFile.cxx" />
+    <ClCompile Include="src\core\binaryFileCache.cxx" />
+    <ClCompile Include="src\core\bone.cxx" />
+    <ClCompile Include="src\core\boundingBox.cxx" />
+    <ClCompile Include="src\core\collisionHierarchy.cxx" />
+    <ClCompile Include="src\core\color.cxx" />
+    <ClCompile Include="src\core\config.cxx" />
+    <ClCompile Include="src\core\constraint.cxx" />
+    <ClCompile Include="src\core\convexHull.cxx" />
+    <ClCompile Include="src\core\coreModule.cxx" />
+    <ClCompile Include="src\core\debugGeometry.cxx" />
+    <ClCompile Include="src\core\frameRate.cxx" />
+    <ClCompile Include="src\core\indexArray.cxx" />
+    <ClCompile Include="src\core\inputEvent.cxx" />
+    <ClCompile Include="src\core\intersection.cxx" />
+    <ClCompile Include="src\core\loadedResource.cxx" />
+    <ClCompile Include="src\core\loadingCallback.cxx" />
+    <ClCompile Include="src\core\loadManager.cxx" />
+    <ClCompile Include="src\core\loadManagerRecursive.cxx" />
+    <ClCompile Include="src\core\loadManagerUtils.cxx" />
+    <ClCompile Include="src\core\mat3.cxx" />
+    <ClCompile Include="src\core\mat4.cxx" />
+    <ClCompile Include="src\core\normal.cxx" />
+    <ClCompile Include="src\core\normalArray.cxx" />
+    <ClCompile Include="src\core\occlusionMap.cxx" />
+    <ClCompile Include="src\core\orthographicCamera.cxx" />
+    <ClCompile Include="src\core\parallelPlanes.cxx" />
+    <ClCompile Include="src\core\perspectiveCamera.cxx" />
+    <ClCompile Include="src\core\plane.cxx" />
+    <ClCompile Include="src\core\quat.cxx" />
+    <ClCompile Include="src\core\ray.cxx" />
+    <ClCompile Include="src\core\rect.cxx" />
+    <ClCompile Include="src\core\rigidBody.cxx" />
+    <ClCompile Include="src\core\skinningMatrix.cxx" />
+    <ClCompile Include="src\core\sphere.cxx" />
+    <ClCompile Include="src\core\terrain.cxx" />
+    <ClCompile Include="src\core\timer.cxx" />
+    <ClCompile Include="src\core\transform.cxx" />
+    <ClCompile Include="src\core\triangle.cxx" />
+    <ClCompile Include="src\core\triangleList.cxx" />
+    <ClCompile Include="src\core\vec2.cxx" />
+    <ClCompile Include="src\core\vec3.cxx" />
+    <ClCompile Include="src\core\vec3Array.cxx" />
+    <ClCompile Include="src\draw.cxx" />
+    <ClCompile Include="src\main.cxx" />
+    <ClCompile Include="src\render\abstractIrradianceVolume.cxx" />
+    <ClCompile Include="src\render\abstractProjectedKaleidoscope.cxx" />
+    <ClCompile Include="src\render\abstractProjectedTexture.cxx" />
+    <ClCompile Include="src\render\canvas.cxx" />
+    <ClCompile Include="src\render\clearScreen.cxx" />
+    <ClCompile Include="src\render\decal.cxx" />
+    <ClCompile Include="src\render\fbo.cxx" />
+    <ClCompile Include="src\render\font.cxx" />
+    <ClCompile Include="src\render\fontManager.cxx" />
+    <ClCompile Include="src\render\glDebug.cxx" />
+    <ClCompile Include="src\render\imageFile.cxx" />
+    <ClCompile Include="src\render\indexedTriangles.cxx" />
+    <ClCompile Include="src\render\label.cxx" />
+    <ClCompile Include="src\render\lighting.cxx" />
+    <ClCompile Include="src\render\panel.cxx" />
+    <ClCompile Include="src\render\program.cxx" />
+    <ClCompile Include="src\render\projectedKaleidoscope.cxx" />
+    <ClCompile Include="src\render\projectedTexture.cxx" />
+    <ClCompile Include="src\render\readBack.cxx" />
+    <ClCompile Include="src\render\regularView.cxx" />
+    <ClCompile Include="src\render\renderGraph.cxx" />
+    <ClCompile Include="src\render\renderModule.cxx" />
+    <ClCompile Include="src\render\renderState.cxx" />
+    <ClCompile Include="src\render\renderTask.cxx" />
+    <ClCompile Include="src\render\setTexture.cxx" />
+    <ClCompile Include="src\render\shader.cxx" />
+    <ClCompile Include="src\render\shaderAttributes.cxx" />
+    <ClCompile Include="src\render\shaderFlag.cxx" />
+    <ClCompile Include="src\render\shaderManager.cxx" />
+    <ClCompile Include="src\render\shaderTag.cxx" />
+    <ClCompile Include="src\render\shaderUniforms.cxx" />
+    <ClCompile Include="src\render\shadow.cxx" />
+    <ClCompile Include="src\render\shadowView.cxx" />
+    <ClCompile Include="src\render\sphericalHarmonics.cxx" />
+    <ClCompile Include="src\render\spotlight.cxx" />
+    <ClCompile Include="src\render\sunlight.cxx" />
+    <ClCompile Include="src\render\texture.cxx" />
+    <ClCompile Include="src\render\textureManager.cxx" />
+    <ClCompile Include="src\render\uniform.cxx" />
+    <ClCompile Include="src\render\uniformArray.cxx" />
+    <ClCompile Include="src\render\vertexAttribute.cxx" />
+    <ClCompile Include="src\render\vertexAttributeArray.cxx" />
+    <ClCompile Include="src\render\vertexBuffer.cxx" />
+    <ClCompile Include="src\render\view.cxx" />
+    <ClCompile Include="src\render\viewBuilder.cxx" />
+    <ClCompile Include="src\scene\builder.cxx" />
+    <ClCompile Include="src\scene\collisionEvent.cxx" />
+    <ClCompile Include="src\scene\labelTask.cxx" />
+    <ClCompile Include="src\scene\lights.cxx" />
+    <ClCompile Include="src\scene\panelTask.cxx" />
+    <ClCompile Include="src\scene\physics.cxx" />
+    <ClCompile Include="src\scene\sceneModule.cxx" />
+    <ClCompile Include="src\scene\sceneProgram.cxx" />
+    <ClCompile Include="src\scene\sceneProgramManager.cxx" />
+    <ClCompile Include="src\scene\sgAnimator.cxx" />
+    <ClCompile Include="src\scene\sgCamera.cxx" />
+    <ClCompile Include="src\scene\sgCollision.cxx" />
+    <ClCompile Include="src\scene\sgConstraint.cxx" />
+    <ClCompile Include="src\scene\sgEdgeIndexArray.cxx" />
+    <ClCompile Include="src\scene\sgEndEffector.cxx" />
+    <ClCompile Include="src\scene\sgEnvmap.cxx" />
+    <ClCompile Include="src\scene\sgIndexedTriangles.cxx" />
+    <ClCompile Include="src\scene\sgIrradianceVolume.cxx" />
+    <ClCompile Include="src\scene\sgMirror.cxx" />
+    <ClCompile Include="src\scene\sgModel.cxx" />
+    <ClCompile Include="src\scene\sgNode.cxx" />
+    <ClCompile Include="src\scene\sgProjectedKaleidoscope.cxx" />
+    <ClCompile Include="src\scene\sgProjectedTexture.cxx" />
+    <ClCompile Include="src\scene\sgRigidBody.cxx" />
+    <ClCompile Include="src\scene\sgRotate.cxx" />
+    <ClCompile Include="src\scene\sgShader.cxx" />
+    <ClCompile Include="src\scene\sgSkinningMatrices.cxx" />
+    <ClCompile Include="src\scene\sgSunlight.cxx" />
+    <ClCompile Include="src\scene\sgTransform.cxx" />
+    <ClCompile Include="src\scene\sgTranslate.cxx" />
+    <ClCompile Include="src\scene\sgUniform.cxx" />
+    <ClCompile Include="src\scene\sgVertexAttribute.cxx" />
+    <ClCompile Include="src\scene\sgVolumetricLighting.cxx" />
+    <ClCompile Include="src\scene\system.cxx" />
+    <ClCompile Include="src\scene\updateState.cxx" />
+    <ClCompile Include="src\scene\viewTask.cxx" />
+    <ClCompile Include="src\scene\viewWrapper.cxx" />
+    <ClCompile Include="src\scripting\bool.cxx" />
+    <ClCompile Include="src\scripting\branch.cxx" />
+    <ClCompile Include="src\scripting\breakpointMarker.cxx" />
+    <ClCompile Include="src\scripting\caller.cxx" />
+    <ClCompile Include="src\scripting\classInstance.cxx" />
+    <ClCompile Include="src\scripting\command.cxx" />
+    <ClCompile Include="src\scripting\function.cxx" />
+    <ClCompile Include="src\scripting\list.cxx" />
+    <ClCompile Include="src\scripting\map.cxx" />
+    <ClCompile Include="src\scripting\mathModule.cxx" />
+    <ClCompile Include="src\scripting\none.cxx" />
+    <ClCompile Include="src\scripting\pair.cxx" />
+    <ClCompile Include="src\scripting\parameters.cxx" />
+    <ClCompile Include="src\scripting\parser.cxx" />
+    <ClCompile Include="src\scripting\path.cxx" />
+    <ClCompile Include="src\scripting\placeholder.cxx" />
+    <ClCompile Include="src\scripting\procedure.cxx" />
+    <ClCompile Include="src\scripting\program.cxx" />
+    <ClCompile Include="src\scripting\real.cxx" />
+    <ClCompile Include="src\scripting\scriptClass.cxx" />
+    <ClCompile Include="src\scripting\scriptException.cxx" />
+    <ClCompile Include="src\scripting\scriptExecutionState.cxx" />
+    <ClCompile Include="src\scripting\scriptObject.cxx" />
+    <ClCompile Include="src\scripting\set.cxx" />
+    <ClCompile Include="src\scripting\string.cxx" />
+    <ClCompile Include="src\scripting\token.cxx" />
+    <ClCompile Include="src\scripting\tokens.cxx" />
+    <ClCompile Include="src\update.cxx" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\core\abstractLight.h" />
+    <ClInclude Include="src\core\abstractSpotlight.h" />
+    <ClInclude Include="src\core\abstractSunlight.h" />
+    <ClInclude Include="src\core\animation.h" />
+    <ClInclude Include="src\core\aspect.h" />
+    <ClInclude Include="src\core\bezier.h" />
+    <ClInclude Include="src\core\binary.h" />
+    <ClInclude Include="src\core\binaryFile.h" />
+    <ClInclude Include="src\core\binaryFileCache.h" />
+    <ClInclude Include="src\core\bone.h" />
+    <ClInclude Include="src\core\boundingBox.h" />
+    <ClInclude Include="src\core\bucket3d.h" />
+    <ClInclude Include="src\core\camera.h" />
+    <ClInclude Include="src\core\collisionHierarchy.h" />
+    <ClInclude Include="src\core\color.h" />
+    <ClInclude Include="src\core\config.h" />
+    <ClInclude Include="src\core\constraint.h" />
+    <ClInclude Include="src\core\convexHull.h" />
+    <ClInclude Include="src\core\coreModule.h" />
+    <ClInclude Include="src\core\debugGeometry.h" />
+    <ClInclude Include="src\core\endEffector.h" />
+    <ClInclude Include="src\core\frameRate.h" />
+    <ClInclude Include="src\core\indexArray.h" />
+    <ClInclude Include="src\core\inputEvent.h" />
+    <ClInclude Include="src\core\intersection.h" />
+    <ClInclude Include="src\core\loadedResource.h" />
+    <ClInclude Include="src\core\loadingCallback.h" />
+    <ClInclude Include="src\core\loadManager.h" />
+    <ClInclude Include="src\core\loadManagerRecursive.h" />
+    <ClInclude Include="src\core\loadManagerUtils.h" />
+    <ClInclude Include="src\core\mat3.h" />
+    <ClInclude Include="src\core\mat4.h" />
+    <ClInclude Include="src\core\nameToIdMap.h" />
+    <ClInclude Include="src\core\normal.h" />
+    <ClInclude Include="src\core\normalArray.h" />
+    <ClInclude Include="src\core\occlusionMap.h" />
+    <ClInclude Include="src\core\orthographicCamera.h" />
+    <ClInclude Include="src\core\parallelPlanes.h" />
+    <ClInclude Include="src\core\perspectiveCamera.h" />
+    <ClInclude Include="src\core\plane.h" />
+    <ClInclude Include="src\core\quat.h" />
+    <ClInclude Include="src\core\ray.h" />
+    <ClInclude Include="src\core\rect.h" />
+    <ClInclude Include="src\core\rigidBody.h" />
+    <ClInclude Include="src\core\rtree.h" />
+    <ClInclude Include="src\core\skinningMatrix.h" />
+    <ClInclude Include="src\core\sphere.h" />
+    <ClInclude Include="src\core\terrain.h" />
+    <ClInclude Include="src\core\timer.h" />
+    <ClInclude Include="src\core\transform.h" />
+    <ClInclude Include="src\core\triangle.h" />
+    <ClInclude Include="src\core\triangleList.h" />
+    <ClInclude Include="src\core\vec2.h" />
+    <ClInclude Include="src\core\vec3.h" />
+    <ClInclude Include="src\core\vec3Array.h" />
+    <ClInclude Include="src\draw.h" />
+    <ClInclude Include="src\render\abstractIrradianceVolume.h" />
+    <ClInclude Include="src\render\abstractProjectedKaleidoscope.h" />
+    <ClInclude Include="src\render\abstractProjectedTexture.h" />
+    <ClInclude Include="src\render\blendFlag.h" />
+    <ClInclude Include="src\render\canvas.h" />
+    <ClInclude Include="src\render\clearScreen.h" />
+    <ClInclude Include="src\render\decal.h" />
+    <ClInclude Include="src\render\fbo.h" />
+    <ClInclude Include="src\render\font.h" />
+    <ClInclude Include="src\render\fontManager.h" />
+    <ClInclude Include="src\render\glDebug.h" />
+    <ClInclude Include="src\render\imageFile.h" />
+    <ClInclude Include="src\render\indexedTriangles.h" />
+    <ClInclude Include="src\render\irradianceVolume.h" />
+    <ClInclude Include="src\render\label.h" />
+    <ClInclude Include="src\render\lighting.h" />
+    <ClInclude Include="src\render\panel.h" />
+    <ClInclude Include="src\render\pointlight.h" />
+    <ClInclude Include="src\render\program.h" />
+    <ClInclude Include="src\render\projectedKaleidoscope.h" />
+    <ClInclude Include="src\render\projectedTexture.h" />
+    <ClInclude Include="src\render\readBack.h" />
+    <ClInclude Include="src\render\regularView.h" />
+    <ClInclude Include="src\render\renderGraph.h" />
+    <ClInclude Include="src\render\renderModule.h" />
+    <ClInclude Include="src\render\renderState.h" />
+    <ClInclude Include="src\render\renderTask.h" />
+    <ClInclude Include="src\render\setTexture.h" />
+    <ClInclude Include="src\render\shader.h" />
+    <ClInclude Include="src\render\shaderAttributes.h" />
+    <ClInclude Include="src\render\shaderFlag.h" />
+    <ClInclude Include="src\render\shaderManager.h" />
+    <ClInclude Include="src\render\shaderTag.h" />
+    <ClInclude Include="src\render\shaderUniforms.h" />
+    <ClInclude Include="src\render\shadow.h" />
+    <ClInclude Include="src\render\shadowView.h" />
+    <ClInclude Include="src\render\sphericalHarmonics.h" />
+    <ClInclude Include="src\render\spotlight.h" />
+    <ClInclude Include="src\render\sunlight.h" />
+    <ClInclude Include="src\render\texture.h" />
+    <ClInclude Include="src\render\textureManager.h" />
+    <ClInclude Include="src\render\uniform.h" />
+    <ClInclude Include="src\render\uniformArray.h" />
+    <ClInclude Include="src\render\vertexAttribute.h" />
+    <ClInclude Include="src\render\vertexAttributeArray.h" />
+    <ClInclude Include="src\render\vertexBuffer.h" />
+    <ClInclude Include="src\render\view.h" />
+    <ClInclude Include="src\render\viewBuilder.h" />
+    <ClInclude Include="src\scene\builder.h" />
+    <ClInclude Include="src\scene\collisionEvent.h" />
+    <ClInclude Include="src\scene\labelTask.h" />
+    <ClInclude Include="src\scene\lights.h" />
+    <ClInclude Include="src\scene\panelTask.h" />
+    <ClInclude Include="src\scene\physics.h" />
+    <ClInclude Include="src\scene\sceneModule.h" />
+    <ClInclude Include="src\scene\sceneProgram.h" />
+    <ClInclude Include="src\scene\sceneProgramManager.h" />
+    <ClInclude Include="src\scene\sgAnimator.h" />
+    <ClInclude Include="src\scene\sgCamera.h" />
+    <ClInclude Include="src\scene\sgCollision.h" />
+    <ClInclude Include="src\scene\sgConstraint.h" />
+    <ClInclude Include="src\scene\sgEdgeIndexArray.h" />
+    <ClInclude Include="src\scene\sgEndEffector.h" />
+    <ClInclude Include="src\scene\sgEnvmap.h" />
+    <ClInclude Include="src\scene\sgIndexedTriangles.h" />
+    <ClInclude Include="src\scene\sgIrradianceVolume.h" />
+    <ClInclude Include="src\scene\sgMirror.h" />
+    <ClInclude Include="src\scene\sgModel.h" />
+    <ClInclude Include="src\scene\sgNode.h" />
+    <ClInclude Include="src\scene\sgProjectedKaleidoscope.h" />
+    <ClInclude Include="src\scene\sgProjectedTexture.h" />
+    <ClInclude Include="src\scene\sgRigidBody.h" />
+    <ClInclude Include="src\scene\sgRotate.h" />
+    <ClInclude Include="src\scene\sgShader.h" />
+    <ClInclude Include="src\scene\sgSkinningMatrices.h" />
+    <ClInclude Include="src\scene\sgSunlight.h" />
+    <ClInclude Include="src\scene\sgTransform.h" />
+    <ClInclude Include="src\scene\sgTranslate.h" />
+    <ClInclude Include="src\scene\sgUniform.h" />
+    <ClInclude Include="src\scene\sgVertexAttribute.h" />
+    <ClInclude Include="src\scene\sgVolumetricLighting.h" />
+    <ClInclude Include="src\scene\system.h" />
+    <ClInclude Include="src\scene\taskInitNode.h" />
+    <ClInclude Include="src\scene\taskWrapper.h" />
+    <ClInclude Include="src\scene\updateNode.h" />
+    <ClInclude Include="src\scene\updateState.h" />
+    <ClInclude Include="src\scene\viewTask.h" />
+    <ClInclude Include="src\scene\viewWrapper.h" />
+    <ClInclude Include="src\scene\visualizeNode.h" />
+    <ClInclude Include="src\scripting\bool.h" />
+    <ClInclude Include="src\scripting\branch.h" />
+    <ClInclude Include="src\scripting\breakpointHandler.h" />
+    <ClInclude Include="src\scripting\breakpointMarker.h" />
+    <ClInclude Include="src\scripting\caller.h" />
+    <ClInclude Include="src\scripting\classInstance.h" />
+    <ClInclude Include="src\scripting\command.h" />
+    <ClInclude Include="src\scripting\exceptionHandler.h" />
+    <ClInclude Include="src\scripting\executable.h" />
+    <ClInclude Include="src\scripting\function.h" />
+    <ClInclude Include="src\scripting\functor.h" />
+    <ClInclude Include="src\scripting\kwarg.h" />
+    <ClInclude Include="src\scripting\list.h" />
+    <ClInclude Include="src\scripting\map.h" />
+    <ClInclude Include="src\scripting\mathModule.h" />
+    <ClInclude Include="src\scripting\none.h" />
+    <ClInclude Include="src\scripting\pair.h" />
+    <ClInclude Include="src\scripting\parameter.h" />
+    <ClInclude Include="src\scripting\parameters.h" />
+    <ClInclude Include="src\scripting\parser.h" />
+    <ClInclude Include="src\scripting\path.h" />
+    <ClInclude Include="src\scripting\placeholder.h" />
+    <ClInclude Include="src\scripting\procedure.h" />
+    <ClInclude Include="src\scripting\program.h" />
+    <ClInclude Include="src\scripting\real.h" />
+    <ClInclude Include="src\scripting\scriptClass.h" />
+    <ClInclude Include="src\scripting\scriptException.h" />
+    <ClInclude Include="src\scripting\scriptExecutionException.h" />
+    <ClInclude Include="src\scripting\scriptExecutionState.h" />
+    <ClInclude Include="src\scripting\scriptObject.h" />
+    <ClInclude Include="src\scripting\scriptTerminationException.h" />
+    <ClInclude Include="src\scripting\set.h" />
+    <ClInclude Include="src\scripting\string.h" />
+    <ClInclude Include="src\scripting\token.h" />
+    <ClInclude Include="src\scripting\tokens.h" />
+    <ClInclude Include="src\update.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

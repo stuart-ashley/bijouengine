@@ -1,0 +1,120 @@
+//----------------------------------------------------------------------------
+// attributes
+//----------------------------------------------------------------------------
+attribute vec3 a_position;
+attribute vec3 a_normal;
+attribute vec4 a_color;
+attribute vec3 a_binormal;
+attribute vec2 a_colorUV;
+attribute vec2 a_normalUV;
+attribute vec2 a_alphaUV;
+attribute vec2 a_specularUV;
+attribute vec2 a_lightUV;
+attribute vec4 a_boneIndices;
+attribute vec4 a_boneWeights;
+attribute vec2 a_offsetUV;
+attribute float a_vertexAO;
+//----------------------------------------------------------------------------
+// uniforms
+//----------------------------------------------------------------------------
+uniform mat4 proj_matrix;
+uniform mat4 modelView_matrices[ MAX_INSTANCES ];
+uniform mat3 normal_matrices[ MAX_INSTANCES ];
+// skinning
+uniform mat4 SkinningMatrices[ 32 ];
+// scale
+uniform mat4 u_vertexTransform;
+//----------------------------------------------------------------------------
+// varying
+//----------------------------------------------------------------------------
+varying vec3 v_position; // view space position
+varying vec3 v_normal;   // view space normal
+varying vec4 v_color;    // vertex color
+varying vec3 v_binormal;
+varying vec2 v_coluv;
+varying vec2 v_normuv;
+varying vec2 v_alphauv;
+varying vec2 v_specuv;
+varying vec2 v_lightuv;
+varying vec2 v_offsetuv;
+varying float v_vertexao;
+// reflection space texture coordinates
+varying vec3 v_reflectionCoord;
+//----------------------------------------------------------------------------
+// main
+//----------------------------------------------------------------------------
+void main()
+{
+	vec4 p = vec4( a_position, 1. );
+
+#ifdef VERTEX_TRANSFORM
+	p = u_vertexTransform * p;
+#endif
+
+#if defined( SKINNING ) && !defined( NORMAL )
+	vec4 modelSpacePosition = vec4( 0., 0., 0., 0. );
+	for ( int i = 0; i < 4; ++i ) {
+		mat4 m = SkinningMatrices[ int( a_boneIndices[ i ] ) ];
+		modelSpacePosition += m * p * a_boneWeights[ i ];
+	}
+#elif defined( SKINNING ) && defined( NORMAL )
+	vec4 modelSpacePosition = vec4( 0., 0., 0., 0. );
+	vec3 modelSpaceNormal = vec3( 0., 0., 0. );
+	for ( int i = 0; i < 4; ++i ) {
+		mat4 m = SkinningMatrices[ int( a_boneIndices[ i ] ) ];
+		modelSpacePosition += m * p * a_boneWeights[ i ];
+		modelSpaceNormal += ( m * vec4( a_normal, 0. ) * a_boneWeights[ i ] ).xyz;
+	}
+	v_normal = normal_matrices[ gl_InstanceID ] * normalize( modelSpaceNormal );
+#elif defined( NORMAL)
+	vec4 modelSpacePosition = p;
+	v_normal = normal_matrices[ gl_InstanceID ] * a_normal;
+#else
+	vec4 modelSpacePosition = p;
+#endif
+
+	vec4 vsp = modelView_matrices[ gl_InstanceID ] * modelSpacePosition;
+	gl_Position = proj_matrix * vsp;
+	v_position = vsp.xyz;
+
+#if defined( MIRROR ) || defined( REFRACTION )
+	v_reflectionCoord.x = ( gl_Position.x + gl_Position.w ) * .5;
+	v_reflectionCoord.y = ( gl_Position.y + gl_Position.w ) * .5;
+	v_reflectionCoord.z = gl_Position.w;
+#endif
+
+#ifdef VERTEX_COLOR
+	v_color = a_color;
+#endif
+
+#ifdef ALPHAMAP
+	v_alphauv = a_alphaUV;
+#endif
+
+#ifdef COLORMAP
+	v_coluv = a_colorUV;
+#endif
+
+#ifdef NORMALMAP
+	v_normuv = a_normalUV;
+	v_binormal = normal_matrices[ gl_InstanceID ] * a_binormal;
+#endif
+
+#ifdef SPECULARMAP
+	v_specuv = a_specularUV;
+#endif
+
+#if defined( LIGHTMAP ) || defined( LUMINANCEMAP )
+	v_lightuv = a_lightUV;
+#endif
+
+#ifdef OFFSETZ
+	v_offsetuv = a_offsetUV;
+#endif
+
+#ifdef VERTEX_AO
+	v_vertexao = a_vertexAO;
+#endif
+}
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
